@@ -1,0 +1,31 @@
+sequenceDiagram
+    actor U as Usuario
+    participant P as ModulePageLayout
+    participant H as useCrudModule
+    participant A as useApiClient
+    participant R as API Route POST
+    participant V as Zod Validation
+    participant FR as Firestore Repository
+    participant FS as Cloud Firestore
+    participant CF as Cloud Functions
+
+    U->>P: Click "Agregar" → Abre FormDrawer
+    U->>P: Completa formulario → Submit
+    P->>H: create(formData)
+    H->>A: post("/api/tenders", formData)
+    A->>R: HTTP POST + Bearer Token
+    R->>R: getTenantContext() - Valida token y rol
+    R->>V: createSchema.parse(body)
+    V-->>R: Datos validados
+    R->>FR: createEntity(tenantId, "tenders", data)
+    FR->>FS: SET /tenants/{tid}/tenders/{uuid}
+    FS-->>FR: OK
+    FR-->>R: Tender creado
+    R-->>A: 201 OK
+    A-->>H: Response
+    H->>A: get("/api/tenders") - Recarga lista
+    H-->>P: items actualizados
+    P->>U: Toast "Licitacion creada"
+    Note over FS,CF: Async trigger
+    FS->>CF: onDocumentWritten
+    CF->>FS: Crea AuditLogEntry

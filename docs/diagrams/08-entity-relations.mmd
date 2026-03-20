@@ -1,0 +1,25 @@
+erDiagram
+    TENDERS ||--o{ CONTRACTS : "tenderId"
+    CONTRACTS ||--o{ OPERATION_TASKS : "contractId"
+    CONTRACTS ||--o{ FINANCE_ENTRIES : "contractId"
+    CONTRACTS ||--o{ VACANCIES : "contractId"
+    VACANCIES ||--o{ CANDIDATES : "vacancyId"
+    CANDIDATES ||--o| PEOPLE_RECORDS : "personRecordId"
+    PEOPLE_RECORDS ||--o{ PERSON_DOCUMENTS : "personId"
+    PEOPLE_RECORDS ||--o{ PERSON_CONTRACT_ASSIGNMENTS : "personId"
+    CONTRACTS ||--o{ PERSON_CONTRACT_ASSIGNMENTS : "contractId"
+    CORRESPONDENCE_TEMPLATES ||--o{ CORRESPONDENCE_JOBS : "templateId"
+    CORRESPONDENCE_DATA_SOURCES ||--o{ CORRESPONDENCE_JOBS : "dataSourceId"
+
+    TENDERS { string title; string client; number amount; string status }
+    CONTRACTS { string tenderId; string name; number totalValue; string status }
+    OPERATION_TASKS { string contractId; string title; string priority; string status }
+    FINANCE_ENTRIES { string contractId; string type; number amount; string status }
+    VACANCIES { string title; string contractId; number openings; string status }
+    CANDIDATES { string vacancyId; string name; number salary; string stage }
+    PEOPLE_RECORDS { string fullName; string idNumber; string position; string contractId }
+    PERSON_DOCUMENTS { string personId; string docType; string contractId; string status }
+    PERSON_CONTRACT_ASSIGNMENTS { string personId; string contractId; string startDate; string status }
+    CORRESPONDENCE_TEMPLATES { string name; string fileName; string delimiter }
+    CORRESPONDENCE_DATA_SOURCES { string name; string sourceType }
+    CORRESPONDENCE_JOBS { string templateId; string dataSourceId; string status }

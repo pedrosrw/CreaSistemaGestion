@@ -1,0 +1,31 @@
+sequenceDiagram
+    actor U as Usuario
+    participant P as ModulePageLayout
+    participant CD as ConfirmDialog
+    participant H as useCrudModule
+    participant A as useApiClient
+    participant R as API Route DELETE
+    participant FR as Firestore Repository
+    participant FS as Cloud Firestore
+
+    U->>P: Click "✕" en fila
+    P->>CD: Abre ConfirmDialog
+    CD->>U: "Seguro que desea eliminar?"
+    alt Confirma
+        U->>CD: Click "Eliminar"
+        CD->>P: onConfirm()
+        P->>H: remove(id)
+        H->>A: delete("/api/tenders?id=xxx")
+        A->>R: HTTP DELETE + Bearer Token
+        R->>R: getTenantContext()
+        R->>FR: deleteEntity(tenantId, "tenders", id)
+        FR->>FS: DELETE doc
+        FS-->>FR: OK
+        FR-->>R: void
+        R-->>A: 200 OK
+        H->>H: reload()
+        P->>U: Toast "Eliminado exitosamente"
+    else Cancela
+        U->>CD: Click "Cancelar"
+        P->>U: Cierra dialogo
+    end

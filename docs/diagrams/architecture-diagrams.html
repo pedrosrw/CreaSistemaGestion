@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CreaSistemaGestion – Diagramas de Arquitectura</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f4f6f9;
+      color: #1a202c;
+      padding: 2rem;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      color: #2d3748;
+    }
+    .subtitle {
+      text-align: center;
+      color: #718096;
+      margin-bottom: 2.5rem;
+      font-size: 0.95rem;
+    }
+    .diagram-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      margin-bottom: 2.5rem;
+      overflow: hidden;
+    }
+    .diagram-header {
+      background: linear-gradient(135deg, #2b6cb0 0%, #2c7a7b 100%);
+      color: #fff;
+      padding: 1rem 1.5rem;
+    }
+    .diagram-header h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .diagram-header p {
+      font-size: 0.82rem;
+      opacity: 0.85;
+      margin-top: 0.2rem;
+    }
+    .diagram-body {
+      padding: 1.5rem;
+      overflow-x: auto;
+      text-align: center;
+    }
+    .diagram-body .mermaid {
+      display: inline-block;
+      text-align: left;
+    }
+    nav {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      padding: 1rem 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    nav h3 { margin-bottom: 0.6rem; color: #2d3748; font-size: 0.95rem; }
+    nav ol { padding-left: 1.2rem; }
+    nav li { padding: 0.2rem 0; }
+    nav a { color: #2b6cb0; text-decoration: none; font-size: 0.9rem; }
+    nav a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<h1>🏗️ CreaSistemaGestion ERP</h1>
+<p class="subtitle">Diagramas de Arquitectura – Sistema Modular</p>
+
+<nav>
+  <h3>Índice de Diagramas</h3>
+  <ol>
+    <li><a href="#d1">Flujo General del Sistema Modular</a></li>
+    <li><a href="#d2">Anatomía de un Módulo ERP</a></li>
+    <li><a href="#d3">Flujo CRUD Completo (Crear)</a></li>
+    <li><a href="#d4">Flujo DELETE con Confirmación</a></li>
+    <li><a href="#d5">Generador de Módulos CLI</a></li>
+    <li><a href="#d6">Arquitectura Multi-Tenant (Firestore)</a></li>
+    <li><a href="#d7">Autenticación y Control de Acceso (RBAC)</a></li>
+    <li><a href="#d8">Diagrama de Relaciones entre Entidades</a></li>
+    <li><a href="#d9">Mapa de Módulos ERP (Roadmap)</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<div class="diagram-card" id="d1">
+  <div class="diagram-header">
+    <h2>1. Flujo General del Sistema Modular</h2>
+    <p>Desde el navegador hasta Firebase, pasando por todos los componentes del stack</p>
+  </div>
+  <div class="diagram-body">
+    <div class="mermaid">
+flowchart TB
+    subgraph USUARIO["👤 Usuario"]
+        Browser["Navegador Web"]
+    end
+    subgraph FRONTEND["Frontend – Next.js 14 App Router"]
+        direction TB
+        AuthProvider["AuthProvider\n(Firebase Auth)"]
+        AuthGuard["AuthGuard\n(Protege rutas)"]
+        AppShell["AppShell\n(Layout + Nav)"]
+        subgraph MODULOS_UI["Módulos UI (src/modules/)"]
+            direction LR
+            M1["tenders/\nLicitaciones"]
+            M2["contracts/\nContratos"]
+            M3["operations/\nOperaciones"]
+            M4["finance/\nFinanzas"]
+            M5["hr-recruiting/\nReclutamiento"]
+            M6["hr-people/\nPersonas"]
+            M7["correspondence/\nCorrespondencia"]
+        end
+        subgraph SHARED["Componentes Compartidos (_shared/)"]
+            direction LR
+            MPL["ModulePageLayout"]
+            DT["DataTable"]
+            FF["FormFieldsGrid"]
+            FB["FilterBar"]
+            CD["ConfirmDialog"]
+        end
+        subgraph HOOKS["Hooks"]
+            UCM["useCrudModule()"]
+            UAC["useApiClient()"]
+        end
+    end
+    subgraph API["API Routes – Next.js"]
+        CRUD["buildCrudHandlers()\nGET | POST | PATCH | DELETE"]
+        AuthCtx["getTenantContext()\n(Valida token + rol + tenant)"]
+    end
+    subgraph FIREBASE["Google Firebase"]
+        direction TB
+        FAuth["Firebase Auth\n(Google OAuth + Email)"]
+        FStore["Cloud Firestore\n(Multi-tenant)"]
+        FStorage["Cloud Storage\n(Archivos)"]
+        FFunctions["Cloud Functions\n(Triggers)"]
+    end
+    Browser --> AuthProvider --> AuthGuard --> AppShell --> MODULOS_UI
+    M1 & M2 & M3 & M4 & M5 & M6 & M7 --> MPL
+    MPL --> DT & FF & FB & CD
+    MPL --> UCM --> UAC
+    UAC -->|"HTTP + Bearer Token"| CRUD
+    CRUD --> AuthCtx -->|"Valida"| FAuth
+    CRUD -->|"CRUD"| FStore
+    FStore -->|"Write Triggers"| FFunctions
+    FFunctions -->|"Audit Logs"| FStore
+    style SHARED fill:#e8f4fd,stroke:#0f5b9d
+    style MODULOS_UI fill:#f0faf0,stroke:#227d43
+    style FIREBASE fill:#fff3e0,stroke:#b06a10
+    </div>
+  </div>
+</div>
+
+<!-- 2 -->
+<div class="diagram-card" id="d2">
+  <div class="diagram-header">
+    <h2>2. Anatomía de un Módulo ERP</h2>
+    <p>Los 8 archivos que componen cada módulo y cómo se interconectan</p>
+  </div>
+  <div class="diagram-body">
+    <div class="mermaid">
+flowchart LR
+    subgraph MODULE["📦 src/modules/tenders/"]
+        direction TB
+        types["types.ts\n──────\ninterface Tender\ntype TenderStatus"]
+        catalogs["catalogs.ts\n──────\nTENDER_STATUSES\nSTATUS_LABELS"]
+        schema["schema.ts\n──────\ntenderCreateSchema\ntenderPatchSchema\nZod validation"]
+        columns["columns.tsx\n──────\nColumnDef[]\ntitulo, cliente\nmonto, estado"]
+        formFields["form-fields.ts\n──────\nFormFieldDef[]\n(inputs del form)"]
+        kpis["kpis.ts\n──────\nKpiDef[]\nTotal, Abiertas\nWin Rate, Pipeline"]
+        page["page.tsx\n──────\nTendersPage()\nusa ModulePageLayout"]
+        registry["registry.ts\n──────\nModuleDefinition\nroles, rutas\ncolecciones"]
+    end
+    subgraph API_ROUTE["src/app/api/tenders/"]
+        route["route.ts\n──────\nbuildCrudHandlers()\nGET POST PATCH DELETE"]
+    end
+    subgraph APP_PAGE["src/app/(protected)/licitaciones/"]
+        appPage["page.tsx\n(thin wrapper)"]
+    end
+    types --> page
+    catalogs --> columns & formFields & page
+    columns --> page
+    formFields --> page
+    kpis --> page
+    page --> appPage
+    schema --> route
+    style MODULE fill:#f0faf0,stroke:#227d43
+    style API_ROUTE fill:#e8f4fd,stroke:#0f5b9d
+    </div>
+  </div>
+</div>
+
+<!-- 3 -->
+<div class="diagram-card" id="d3">
+  <div class="diagram-header">
+    <h2>3. Flujo CRUD Completo (Crear Registro)</h2>
+    <p>Desde el click en "Agregar" hasta que el dato queda en Firestore con audit log</p>
+  </div>
+  <div class="diagram-body">
+    <div class="mermaid">
+sequenceDiagram
+    actor U as Usuario
+    participant P as ModulePageLayout
+    participant H as useCrudModule
+    participant A as useApiClient
+    participant R as API Route /POST
+    participant V as Zod Validation
+    participant FR as Firestore Repo
+    participant FS as Cloud Firestore
+    participant CF as Cloud Functions
+
+    U->>P: Click "Agregar" → Abre FormDrawer
+    U->>P: Completa formulario → Submit
+    P->>H: create(formData)
+    H->>A: post("/api/tenders", formData)
+    A->>R: HTTP POST + Bearer Token
+    R->>R: getTenantContext() – Valida token y rol
+    R->>V: createSchema.parse(body)
+    V-->>R: Datos validados (o error 400)
+    R->>FR: createEntity(tenantId, "tenders", data, actor)
+    FR->>FS: SET /tenants/{tid}/tenders/{uuid}
+    FS-->>FR: OK
+    FR-->>R: Tender creado { id, ...data }
+    R-->>A: 201 { data: Tender }
+    A-->>H: Response
+    H->>A: get("/api/tenders") – Recarga lista
+    H-->>P: items actualizados
+    P->>U: Toast "Licitación creada" + Cierra drawer
+    Note over FS,CF: Async (trigger)
+    FS->>CF: onDocumentWritten
+    CF->>FS: Crea AuditLogEntry
+    </div>
+  </div>
+</div>
+
+<!-- 4 -->
+<div class="diagram-card" id="d4">
+  <div class="diagram-header">
+    <h2>4. Flujo DELETE con Confirmación</h2>
+    <p>Proceso de eliminación segura con diálogo de confirmación antes de actuar</p>
+  </div>
+  <div class="diagram-body">
+    <div class="mermaid">
+sequenceDiagram
+    actor U as Usuario
+    participant P as ModulePageLayout
+    participant CD as ConfirmDialog
+    participant H as useCrudModule
+    participant A as useApiClient
+    participant R as API Route /DELETE
+    participant FR as Firestore Repo
+    participant FS as Cloud Firestore
+
+    U->>P: Click botón "✕" en fila de la tabla
+    P->>CD: Abre ConfirmDialog
+    CD->>U: "¿Seguro que desea eliminar este registro?"
+    alt Usuario confirma
+        U->>CD: Click "Eliminar"
+        CD->>P: onConfirm()
+        P->>H: remove(id)
+        H->>A: delete("/api/tenders?id=xxx")
+        A->>R: HTTP DELETE + Bearer Token
+        R->>R: getTenantContext() – write access
+        R->>FR: deleteEntity(tenantId, "tenders", id)
+        FR->>FS: Verifica existencia del doc
+        FR->>FS: DELETE doc
+        FS-->>FR: OK
+        FR-->>R: void
+        R-->>A: 200 { ok: true }
+        A-->>H: OK
+        H->>H: reload() – Recarga lista
+        H-->>P: items actualizados
+        P->>U: Toast "Eliminado exitosamente"
+    else Usuario cancela
+        U->>CD: Click "Cancelar"
+        CD->>P: onCancel()
+        P->>U: Cierra diálogo, sin cambios
+    end
+    </div>
+  </div>
+</div>
+
+<!-- 5 -->
+<div class="diagram-card" id="d5">
+  <div class="diagram-header">
+    <h2>5. Generador de Módulos CLI</h2>
+    <p>Qué hace <code>npm run generate:module</code> y qué archivos produce</p>
+  </div>
+  <div class="diagram-body">
+    <div class="mermaid">
+flowchart TB
+    CMD["npm run generate:module --\n--key inventory\n--label 'Inventario'\n--route '/inventario'\n--collection 'inventoryItems'\n--statuses 'active,inactive'"]
+    PARSE["Parsea argumentos CLI"]
+    DERIVE["Deriva nombres:\nPascalCase: InventoryItem\ncamelCase: inventoryItem\nCONST_CASE: INVENTORY_ITEM"]
+    GEN["Genera 10 archivos desde plantillas"]
+    subgraph FILES["📁 Archivos Generados"]
+        direction LR
+        subgraph MOD["src/modules/inventory/"]
+            F1["types.ts"]
+            F2["catalogs.ts"]
+            F3["schema.ts"]
+            F4["columns.tsx"]
+            F5["form-fields.ts"]
+            F6["kpis.ts"]
+            F7["page.tsx"]
+            F8["registry.ts"]
+        end
+        subgraph APIR["src/app/api/inventory/"]
+            F9["route.ts"]
+        end
+        subgraph APPP["src/app/(protected)/inventario/"]
+            F10["page.tsx"]
+        end
+    end
+    MANUAL["Pasos manuales:\n1. Agregar collection a collections.ts\n2. Personalizar campos y columnas\n3. Registrar en _registry/index.ts"]
+    READY["✅ Módulo listo para usar"]
+    CMD --> PARSE --> DERIVE --> GEN --> FILES --> MANUAL --> READY
+    style CMD fill:#e8f4fd,stroke:#0f5b9d
+    style FILES fill:#f0faf0,stroke:#227d43
+    style READY fill:#e8fce8,stroke:#1a7a35
+    </div>
+  </div>
+</div>
+
+<!-- 6 -->
+<div class="diagram-card" id="d6">
+  <div class="diagram-header">
+    <h2>6. Arquitectura Multi-Tenant (Firestore)</h2>
+    <p>Estructura de datos aislada por tenant – cada empresa tiene sus propios datos</p>
+  </div>
+  <div class="diagram-body">
+    <div class="mermaid">
+flowchart TB
+    subgraph FIRESTORE["☁️ Cloud Firestore"]
+        ROOT["/ (root)"]
+        subgraph T1["tenants / tenant-crea /"]
+            direction TB
+            T1_TEND["tenders/\n├─ {id1} Licitación A\n└─ {id2} Licitación B"]
+            T1_CONT["contracts/\n├─ {id3} Contrato X\n└─ {id4} Contrato Y"]
+            T1_OPS["operationTasks/\n└─ {id5} Tarea 1"]
+            T1_FIN["financeEntries/\n└─ {id6} Pago proveedor"]
+            T1_PEOPLE["peopleRecords/\n├─ {id7} Juan Pérez\n└─ {id8} María López"]
+            T1_DOCS["personDocuments/\n└─ {id9} Contrato Juan"]
+            T1_AUDIT["auditLogs/\n└─ {id10} Cambio estado"]
+        end
+        subgraph T2["tenants / tenant-otro /"]
+            T2_DATA["(misma estructura)\nDatos completamente aislados\nsin acceso cruzado"]
+        end
+        ROOT --> T1 & T2
+    end
+    subgraph STORAGE["☁️ Cloud Storage"]
+        S1["tenants/tenant-crea/\n├─ people/{personId}/documents/\n├─ correspondence/templates/\n└─ correspondence/jobs/output/"]
+    end
+    style T1 fill:#e8f4fd,stroke:#0f5b9d
+    style T2 fill:#fff3e0,stroke:#b06a10
+    </div>
+  </div>
+</div>
+
+<!-- 7 -->
+<div class="diagram-card" id="d7">
+  <div class="diagram-header">
+    <h2>7. Autenticación y Control de Acceso (RBAC)</h2>
+    <p>Flujo desde el login hasta la política de acceso por rol</p>
+  </div>
+  <div class="diagram-body">
+    <div class="mermaid">
+flowchart TB
+    subgraph LOGIN["🔐 Login"]
+        U["Usuario"] -->|"Email o Google"| FA["Firebase Auth"]
+        FA -->|"ID Token + Custom Claims"| TOKEN["Token JWT\n{ uid, tenantId, role }"]
+    end
+    subgraph REQUEST["Cada Request a la API"]
+        TOKEN -->|"Bearer Token"| CTX["getAuthContext(req)"]
+        CTX -->|"Verifica firma"| FA
+        CTX --> TENANT["getTenantContext()\n1. Resuelve tenantId\n2. Verifica membership\n3. Resuelve rol efectivo"]
+    end
+    subgraph POLICY["🛡️ Política de Acceso"]
+        TENANT --> CHECK{"accessPolicy\n[ role ][ action ]?"}
+        CHECK -->|"✓ Autorizado"| ALLOW["Permite operación"]
+        CHECK -->|"✗ No autorizado"| DENY["403 Forbidden"]
+    end
+    subgraph ROLES["Jerarquía de Roles"]
+        R1["platform_admin\n(Acceso total a la plataforma)"]
+        R2["tenant_admin\n(Todo dentro de su tenant)"]
+        R3["tender_lead | contract_manager\nfinance | hr\n(Solo su módulo)"]
+        R4["viewer\n(Solo lectura)"]
+        R1 --> R2 --> R3 --> R4
+    end
+    style LOGIN fill:#e8f4fd,stroke:#0f5b9d
+    style POLICY fill:#f0faf0,stroke:#227d43
+    style ROLES fill:#fff3e0,stroke:#b06a10
+    </div>
+  </div>
+</div>
+
+<!-- 8 -->
+<div class="diagram-card" id="d8">
+  <div class="diagram-header">
+    <h2>8. Diagrama de Relaciones entre Entidades</h2>
+    <p>Las 13 entidades del sistema y sus relaciones (Foreign Keys)</p>
+  </div>
+  <div class="diagram-body">
+    <div class="mermaid">
+erDiagram
+    TENDERS ||--o{ CONTRACTS : "tenderId"
+    CONTRACTS ||--o{ OPERATION_TASKS : "contractId"
+    CONTRACTS ||--o{ FINANCE_ENTRIES : "contractId"
+    CONTRACTS ||--o{ VACANCIES : "contractId (opt)"
+    VACANCIES ||--o{ CANDIDATES : "vacancyId"
+    CANDIDATES ||--o| PEOPLE_RECORDS : "personRecordId"
+    CONTRACTS ||--o{ PEOPLE_RECORDS : "contractId (opt)"
+    PEOPLE_RECORDS ||--o{ PERSON_DOCUMENTS : "personId"
+    CONTRACTS ||--o{ PERSON_DOCUMENTS : "contractId (opt)"
+    PEOPLE_RECORDS ||--o{ PERSON_CONTRACT_ASSIGNMENTS : "personId"
+    CONTRACTS ||--o{ PERSON_CONTRACT_ASSIGNMENTS : "contractId"
+    CORRESPONDENCE_TEMPLATES ||--o{ CORRESPONDENCE_JOBS : "templateId"
+    CORRESPONDENCE_DATA_SOURCES ||--o{ CORRESPONDENCE_JOBS : "dataSourceId"
+
+    TENDERS { string title; string client; number amount; string closeDate; string status }
+    CONTRACTS { string tenderId; string name; number totalValue; number progress; string status }
+    OPERATION_TASKS { string contractId; string title; string priority; string status }
+    FINANCE_ENTRIES { string contractId; string type; string concept; number amount; string status }
+    VACANCIES { string title; string area; string contractId; number openings; string status }
+    CANDIDATES { string vacancyId; string name; number salary; string stage }
+    PEOPLE_RECORDS { string fullName; string idNumber; string position; string contractId; string employmentStatus }
+    PERSON_DOCUMENTS { string personId; string docType; string fileName; string contractId; string status }
+    PERSON_CONTRACT_ASSIGNMENTS { string personId; string contractId; string startDate; string status }
+    ACCREDITATION_TEMPLATES { string code; string name; string scope; boolean required }
+    CORRESPONDENCE_TEMPLATES { string name; string fileName; string delimiter }
+    CORRESPONDENCE_DATA_SOURCES { string name; string sourceType }
+    CORRESPONDENCE_JOBS { string templateId; string dataSourceId; string status }
+    </div>
+  </div>
+</div>
+
+<!-- 9 -->
+<div class="diagram-card" id="d9">
+  <div class="diagram-header">
+    <h2>9. Mapa de Módulos ERP – Roadmap</h2>
+    <p>Módulos actuales del sistema y módulos planificados para el futuro</p>
+  </div>
+  <div class="diagram-body">
+    <div class="mermaid">
+mindmap
+  root((ERP\nCreaSistema\nGestion))
+    Comercial
+      Licitaciones
+        Pipeline
+        Probabilidades
+        Win Rate KPI
+      Contratos
+        Detalle contrato
+        Progreso
+        Documentos
+    Operaciones
+      Tareas
+        Board visual
+        Prioridades
+        Bloqueos
+    Finanzas
+      Ingresos
+      Gastos
+      Flujo neto mensual
+    RRHH
+      Reclutamiento
+        Vacantes
+        Candidatos
+        Pipeline hiring
+      Personas
+        Ficha personal
+        Documentos
+        Asignaciones
+        Acreditaciones
+    Correspondencia
+      Templates DOCX
+      Data sources
+      Mail merge jobs
+    Futuros
+      Inventario y Bodega
+        Stock
+        Entradas y Salidas
+        Materiales
+      Compras
+        Órdenes de compra
+        Proveedores
+        Cotizaciones
+      Facturación
+        Emisión facturas
+        Cobros
+        Integración SII
+    Administración
+      Usuarios y Roles
+      Configuración empresa
+      Auditoría
+    </div>
+  </div>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'default',
+    securityLevel: 'loose',
+    flowchart: { htmlLabels: true, curve: 'basis' },
+    sequence: { actorMargin: 60, messageMargin: 40 },
+    er: { layoutDirection: 'TB' }
+  });
+</script>
+</body>
+</html>

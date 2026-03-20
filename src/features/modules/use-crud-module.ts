@@ -66,12 +66,31 @@ export function useCrudModule<TItem>(endpoint: string) {
     [api, endpoint, load]
   );
 
+  const remove = useCallback(
+    async (id: string): Promise<boolean> => {
+      setState("saving");
+      setError(null);
+      try {
+        await api.delete(`${endpoint}?id=${id}`);
+        await load();
+        return true;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "No se pudo eliminar.");
+        return false;
+      } finally {
+        setState("idle");
+      }
+    },
+    [api, endpoint, load]
+  );
+
   return {
     items,
     error,
     pending: state,
     reload: load,
     create,
-    patch
+    patch,
+    remove
   };
 }

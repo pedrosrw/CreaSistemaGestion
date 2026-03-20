@@ -1119,3 +1119,107 @@ td select {
     padding: 12px;
   }
 }
+
+/* --- Modular architecture: shared components --- */
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.filter-search {
+  min-width: 200px;
+  max-width: 320px;
+}
+
+.filter-select {
+  min-width: 140px;
+  max-width: 200px;
+  min-height: 36px;
+  padding: 6px 8px;
+}
+
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.15s ease;
+}
+
+.sortable-header:hover {
+  color: var(--primary);
+}
+
+.clickable-row {
+  cursor: pointer;
+}
+
+.btn-icon-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid rgba(177, 38, 38, 0.3);
+  background: rgba(177, 38, 38, 0.06);
+  color: #8d1e1e;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.14s ease;
+}
+
+.btn-icon-danger:hover {
+  background: rgba(177, 38, 38, 0.16);
+  transform: translateY(-1px);
+}
+
+.confirm-dialog {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(420px, 90vw);
+  background: var(--surface);
+  border: 1px solid #d6e1ef;
+  border-radius: var(--radius);
+  box-shadow: 0 22px 45px -20px rgba(13, 31, 58, 0.8);
+  padding: 20px;
+  display: grid;
+  gap: 14px;
+}
+
+.confirm-dialog h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.confirm-dialog p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.confirm-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+@media (max-width: 720px) {
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-search {
+    max-width: 100%;
+  }
+
+  .filter-select {
+    max-width: 100%;
+  }
+}

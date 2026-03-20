@@ -15,7 +15,8 @@
     "bootstrap:admin": "tsx scripts/bootstrap-admin.ts",
     "seed:demo": "tsx scripts/seed-demo.ts",
     "import:rh": "tsx scripts/import-rh-json.ts",
-    "rules:generate": "tsx scripts/generate-firestore-rules.ts"
+    "rules:generate": "tsx scripts/generate-firestore-rules.ts",
+    "generate:module": "tsx scripts/generate-module.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

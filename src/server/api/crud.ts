@@ -8,6 +8,7 @@ import type { ModuleKey } from "@/types/domain";
 import type { CollectionKey } from "@/types/collections";
 import {
   createEntity,
+  deleteEntity,
   listEntities,
   patchEntity
 } from "@/server/repositories/firestore-repository";
@@ -26,6 +27,8 @@ export type CrudConfig<TCreate extends z.ZodTypeAny, TPatch extends z.ZodTypeAny
   patchSchema: TPatch;
   beforeCreate?: (ctx: CrudHookContext<z.infer<TCreate>, z.infer<TPatch>>) => Promise<void>;
   beforePatch?: (ctx: CrudHookContext<z.infer<TCreate>, z.infer<TPatch>>) => Promise<void>;
+  beforeDelete?: (ctx: { tenantId: string; id: string }) => Promise<void>;
+  allowDelete?: boolean;
 };
 
 function resolveCollectionKey(moduleKey: ModuleKey, explicitCollectionKey?: CollectionKey): CollectionKey {
@@ -117,5 +120,29 @@ export function buildCrudHandlers<TCreate extends z.ZodTypeAny, TPatch extends z
     }
   }
 
-  return { GET, POST, PATCH };
+  async function DELETE(req: NextRequest) {
+    if (!config.allowDelete) {
+      return jsonError(new ApiError(405, "Delete not allowed for this module."));
+    }
+
+    try {
+      const context = await getTenantContext(req, config.moduleKey, "write");
+      const { searchParams } = new URL(req.url);
+      const id = searchParams.get("id");
+      if (!id) {
+        return jsonError(new ApiError(400, "Missing id parameter."));
+      }
+
+      if (config.beforeDelete) {
+        await config.beforeDelete({ tenantId: context.tenantId, id });
+      }
+
+      await deleteEntity(context.tenantId, collectionKey, id);
+      return jsonOk({ ok: true });
+    } catch (error) {
+      return jsonError(error);
+    }
+  }
+
+  return { GET, POST, PATCH, DELETE };
 }

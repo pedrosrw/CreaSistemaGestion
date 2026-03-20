@@ -1,0 +1,20 @@
+flowchart TB
+    subgraph FIRESTORE["Cloud Firestore"]
+        ROOT["/ root"]
+        subgraph T1["tenants/tenant-crea/"]
+            direction TB
+            T1_TEND["tenders/\n(Licitaciones)"]
+            T1_CONT["contracts/\n(Contratos)"]
+            T1_OPS["operationTasks/\n(Tareas)"]
+            T1_FIN["financeEntries/\n(Finanzas)"]
+            T1_PEOPLE["peopleRecords/\n(Personas)"]
+            T1_DOCS["personDocuments/\n(Documentos)"]
+            T1_AUDIT["auditLogs/\n(Auditoria)"]
+        end
+        subgraph T2["tenants/tenant-otro/"]
+            T2_DATA["(misma estructura)\nDatos aislados"]
+        end
+        ROOT --> T1 & T2
+    end
+    style T1 fill:#e8f4fd,stroke:#0f5b9d
+    style T2 fill:#fff3e0,stroke:#b06a10

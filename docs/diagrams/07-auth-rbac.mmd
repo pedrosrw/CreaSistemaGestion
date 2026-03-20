@@ -1,0 +1,26 @@
+flowchart TB
+    subgraph LOGIN["Login"]
+        U["Usuario"] -->|"Email o Google"| FA["Firebase Auth"]
+        FA -->|"ID Token + Claims"| TOKEN["Token JWT\n{uid, tenantId, role}"]
+    end
+    subgraph REQUEST["Cada Request API"]
+        TOKEN -->|"Bearer Token"| CTX["getAuthContext(req)"]
+        CTX -->|"Verifica firma"| FA
+        CTX --> TENANT["getTenantContext()\n1. Resuelve tenantId\n2. Verifica membership\n3. Resuelve rol efectivo"]
+    end
+    subgraph POLICY["Politica de Acceso"]
+        TENANT --> CHECK{"accessPolicy\nrole + action?"}
+        CHECK -->|"SI"| ALLOW["✓ Permite operacion"]
+        CHECK -->|"NO"| DENY["✗ 403 Forbidden"]
+    end
+    subgraph ROLES["Jerarquia de Roles"]
+        R1["platform_admin (Todo)"]
+        R2["tenant_admin (Todo en su tenant)"]
+        R3["tenant_manager (Modulos operativos)"]
+        R4["tender_lead / contract_manager\nfinance / hr (Su modulo)"]
+        R5["viewer (Solo lectura)"]
+        R1 --> R2 --> R3 --> R4 --> R5
+    end
+    style LOGIN fill:#e8f4fd,stroke:#0f5b9d
+    style POLICY fill:#f0faf0,stroke:#227d43
+    style ROLES fill:#fff3e0,stroke:#b06a10

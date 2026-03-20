@@ -1,0 +1,58 @@
+flowchart TB
+    subgraph USUARIO["👤 Usuario"]
+        Browser["Navegador Web"]
+    end
+    subgraph FRONTEND["Frontend - Next.js 14 App Router"]
+        direction TB
+        AuthProvider["AuthProvider\n(Firebase Auth)"]
+        AuthGuard["AuthGuard\n(Protege rutas)"]
+        AppShell["AppShell\n(Layout + Nav)"]
+        subgraph MODULOS_UI["Modulos UI (src/modules/)"]
+            direction LR
+            M1["tenders/"]
+            M2["contracts/"]
+            M3["operations/"]
+            M4["finance/"]
+            M5["hr-recruiting/"]
+            M6["hr-people/"]
+            M7["correspondence/"]
+        end
+        subgraph SHARED["Componentes Compartidos (_shared/)"]
+            direction LR
+            MPL["ModulePageLayout"]
+            DT["DataTable"]
+            FF["FormFieldsGrid"]
+            FB["FilterBar"]
+            CD["ConfirmDialog"]
+        end
+        subgraph HOOKS["Hooks"]
+            UCM["useCrudModule()"]
+            UTS["useTableState()"]
+            UAC["useApiClient()"]
+        end
+    end
+    subgraph API["API Routes - Next.js"]
+        CRUD["buildCrudHandlers()\nGET | POST | PATCH | DELETE"]
+        AuthCtx["getTenantContext()"]
+    end
+    subgraph FIREBASE["Google Firebase"]
+        direction TB
+        FAuth["Firebase Auth"]
+        FStore["Cloud Firestore\n(Multi-tenant)"]
+        FStorage["Cloud Storage"]
+        FFunctions["Cloud Functions"]
+    end
+    Browser --> AuthProvider --> AuthGuard --> AppShell --> MODULOS_UI
+    M1 & M2 & M3 & M4 & M5 & M6 & M7 --> MPL
+    MPL --> DT & FF & FB & CD
+    MPL --> UCM
+    UCM --> UAC
+    UAC -->|"HTTP + Bearer Token"| CRUD
+    CRUD --> AuthCtx
+    AuthCtx -->|"Valida"| FAuth
+    CRUD -->|"CRUD Operations"| FStore
+    FStore -->|"Write Triggers"| FFunctions
+    FFunctions -->|"Audit Logs"| FStore
+    style SHARED fill:#e8f4fd,stroke:#0f5b9d
+    style MODULOS_UI fill:#f0faf0,stroke:#227d43
+    style FIREBASE fill:#fff3e0,stroke:#b06a10

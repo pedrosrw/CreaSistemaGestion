@@ -1,0 +1,25 @@
+flowchart TB
+    CMD["npm run generate:module --\n--key inventory\n--label 'Inventario'\n--route '/inventario'\n--collection 'inventoryItems'"]
+    PARSE["Parsea argumentos CLI"]
+    DERIVE["Deriva nombres:\nPascal: InventoryItem\nCamel: inventoryItem\nConst: INVENTORY_ITEM"]
+    GEN["Genera 10 archivos"]
+    subgraph FILES["Archivos Generados"]
+        direction TB
+        F1["src/modules/inventory/types.ts"]
+        F2["src/modules/inventory/catalogs.ts"]
+        F3["src/modules/inventory/schema.ts"]
+        F4["src/modules/inventory/columns.tsx"]
+        F5["src/modules/inventory/form-fields.ts"]
+        F6["src/modules/inventory/kpis.ts"]
+        F7["src/modules/inventory/page.tsx"]
+        F8["src/modules/inventory/registry.ts"]
+        F9["src/app/api/inventory/route.ts"]
+        F10["src/app/(protected)/inventario/page.tsx"]
+    end
+    MANUAL["Pasos manuales:\n1. Agregar collection a collections.ts\n2. Personalizar campos y columnas\n3. Registrar en _registry/index.ts"]
+    READY["Modulo listo para usar"]
+
+    CMD --> PARSE --> DERIVE --> GEN --> FILES --> MANUAL --> READY
+    style CMD fill:#e8f4fd,stroke:#0f5b9d
+    style FILES fill:#f0faf0,stroke:#227d43
+    style READY fill:#e8fce8,stroke:#1a7a35

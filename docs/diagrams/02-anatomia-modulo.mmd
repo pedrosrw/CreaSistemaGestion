@@ -1,0 +1,22 @@
+flowchart LR
+    subgraph MODULE["📦 src/modules/tenders/"]
+        direction TB
+        types["types.ts\n─────────────\ninterface Tender\nTenderStatus"]
+        schema["schema.ts\n─────────────\ntenderCreateSchema\ntenderPatchSchema\n(Zod)"]
+        columns["columns.tsx\n─────────────\nColumnDef[]\ntitulo, cliente\nmonto, estado"]
+        formFields["form-fields.ts\n─────────────\nFormFieldDef[]"]
+        kpis["kpis.ts\n─────────────\nKpiDef[]\nTotal, Abiertas\nWin Rate, Pipeline"]
+        catalogs["catalogs.ts\n─────────────\nTENDER_STATUSES\nSTATUS_LABELS"]
+        page["page.tsx\n─────────────\nTendersPage()\nusa ModulePageLayout"]
+        registry["registry.ts\n─────────────\nModuleDefinition\nroles, rutas"]
+    end
+    subgraph API_ROUTE["src/app/api/tenders/"]
+        route["route.ts\n─────────────\nbuildCrudHandlers()\nGET POST PATCH DELETE"]
+    end
+    subgraph APP_PAGE["src/app/(protected)/licitaciones/"]
+        appPage["page.tsx\n(thin wrapper)"]
+    end
+    types & catalogs & columns & formFields & kpis --> page
+    schema --> route
+    page --> appPage
+    style MODULE fill:#f0faf0,stroke:#227d43

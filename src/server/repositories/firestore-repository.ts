@@ -122,3 +122,16 @@ export async function getEntity<K extends CollectionKey>(
   if (!doc.exists) return null;
   return normalizeDoc<EntityMap[K]>(doc.id, doc.data() || {});
 }
+
+export async function deleteEntity(
+  tenantId: string,
+  key: CollectionKey,
+  id: string
+): Promise<void> {
+  const docRef = tenantCollection(tenantId, key).doc(id);
+  const snap = await docRef.get();
+  if (!snap.exists) {
+    throw new Error("Entity not found");
+  }
+  await docRef.delete();
+}

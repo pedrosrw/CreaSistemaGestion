@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CreaSistemaGestion ERP - Documentación</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #f4f6f9;
+      color: #1a202c;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    .hero {
+      text-align: center;
+      margin-bottom: 3rem;
+      max-width: 700px;
+    }
+    .hero h1 {
+      font-size: 2.4rem;
+      color: #2d3748;
+      margin-bottom: 0.5rem;
+    }
+    .hero p {
+      color: #718096;
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      max-width: 900px;
+      width: 100%;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+    }
+    .card-header {
+      padding: 1.2rem 1.5rem;
+      color: #fff;
+    }
+    .card-header.blue { background: linear-gradient(135deg, #2b6cb0 0%, #2c7a7b 100%); }
+    .card-header.green { background: linear-gradient(135deg, #276749 0%, #2f855a 100%); }
+    .card-header.orange { background: linear-gradient(135deg, #c05621 0%, #dd6b20 100%); }
+    .card-header h2 { font-size: 1.15rem; font-weight: 600; }
+    .card-body {
+      padding: 1.2rem 1.5rem;
+    }
+    .card-body p {
+      font-size: 0.92rem;
+      color: #4a5568;
+      line-height: 1.5;
+    }
+    .card-body .tag {
+      display: inline-block;
+      margin-top: 0.8rem;
+      padding: 0.25rem 0.7rem;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .tag.interactive { background: #ebf8ff; color: #2b6cb0; }
+    .tag.markdown { background: #f0fff4; color: #276749; }
+    footer {
+      margin-top: 3rem;
+      color: #a0aec0;
+      font-size: 0.82rem;
+    }
+    footer a { color: #4299e1; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>CreaSistemaGestion ERP</h1>
+  <p>
+    Sistema de gestion empresarial modular construido con Next.js 14, Firebase y arquitectura multi-tenant.
+    Documentacion tecnica y diagramas de arquitectura.
+  </p>
+</div>
+
+<div class="cards">
+  <a class="card" href="diagrams/architecture-diagrams.html">
+    <div class="card-header blue">
+      <h2>Diagramas de Arquitectura</h2>
+    </div>
+    <div class="card-body">
+      <p>
+        9 diagramas interactivos: flujo general, anatomia de modulos, CRUD, autenticacion RBAC,
+        relaciones entre entidades, multi-tenant y roadmap del ERP.
+      </p>
+      <span class="tag interactive">Interactivo - Mermaid.js</span>
+    </div>
+  </a>
+
+  <a class="card" href="PROJECT_ANALYSIS.md">
+    <div class="card-header green">
+      <h2>Analisis del Proyecto</h2>
+    </div>
+    <div class="card-body">
+      <p>
+        Analisis completo de la estructura del proyecto, tecnologias utilizadas,
+        patrones de diseno y estado actual de cada modulo.
+      </p>
+      <span class="tag markdown">Markdown</span>
+    </div>
+  </a>
+
+  <a class="card" href="MODULAR_ARCHITECTURE_PLAN.md">
+    <div class="card-header orange">
+      <h2>Plan de Arquitectura Modular</h2>
+    </div>
+    <div class="card-body">
+      <p>
+        Plan detallado de la arquitectura modular, componentes compartidos,
+        generador de modulos y convencion de archivos.
+      </p>
+      <span class="tag markdown">Markdown</span>
+    </div>
+  </a>
+</div>
+
+<footer>
+  <p>CreaSistemaGestion &mdash; <a href="https://github.com/pedrosrw/CreaSistemaGestion">Repositorio en GitHub</a></p>
+</footer>
+
+</body>
+</html>
